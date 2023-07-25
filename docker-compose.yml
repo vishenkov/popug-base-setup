@@ -1,0 +1,33 @@
+version: '3'
+services:
+  db:
+    image: postgres:14.2-alpine
+    container_name: popug-postgres-14.2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: "postgres -c 'max_connections=500'"
+    environment:
+      POSTGRES_DB: popugdb
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+  popug-app-web:
+    build: .
+    command: "bundle exec rails s -p 3000 -b '0.0.0.0'"
+    environment:
+      DB_HOST: db
+      DB_NAME: popugdb
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    volumes:
+      - .:/app:cached
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+volumes:
+  postgres_data: {}
+networks:
+  default:
+    name: popug_app_default
